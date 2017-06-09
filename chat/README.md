@@ -33,7 +33,8 @@ https://github.com/knok/tf-seq2seq-mod
 $ mkdir train
 $ git clone https://github.com/knok/tf-seq2seq-mod
 $ cd tf-seq2seq-mod
-$　python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000 --num_layers 1 --batch_size 5
+$　python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000 --num_layers 1 --batch_size 5  #学習の実行
+$ python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000 --decode  #推論の実行
 ```
 
 ### old
