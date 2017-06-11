@@ -37,6 +37,11 @@ $　python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train 
 $ python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000 --decode  #推論の実行
 ```
 
+推論用flaskサーバの立ち上げ  
+```
+python translate_flask.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000
+```
+
 ### old
 ```
 http://qiita.com/san_/items/128bf1b5a898ad5c18f1  
