@@ -10,6 +10,20 @@
 
 module.exports = (robot) ->
 
+  request = require 'request'
+
+  robot.respond /(.*)/i, (msg) ->
+    #msg.send "Hi, #{msg.match[1]}"
+    url = "http://127.0.0.1:5000/hello?msg="+msg.match[1]
+    #msg.send url
+    robot.http(url)
+    .get() (err, res, body) ->
+        if err
+          msg.send "sorry, #{msg.message.user.name}. I cannot understand..."
+        # 返ってきた値を使って何かする
+        msg.send "#{body}"
+        #msg.send url
+
   # robot.hear /badger/i, (res) ->
   #   res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
   #
