@@ -37,6 +37,26 @@ $　python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train 
 $ python translate.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000 --decode  #推論の実行
 ```
 
+推論用flaskサーバの立ち上げ  
+```
+python translate_flask.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000
+```
+
+### norabot
+```
+http://qiita.com/mochidamochiko/items/29c2d77715d8a1ff062a
+などを参考にhubotを利用してslackbotを作成した。
+```
+
+## 利用手順（初期設定終了後）
+```
+cd chat/tf-seq2seq-mod
+python translate_flask.py --data_dir ../make-meidai-dialogue --train_dir ../train --size 400 --en_vocab_size 10000 --fr_vocab_size 10000
+別ターミナル上で、
+cd chat/norabot
+./bin/hubot --adapter slack
+```
+
 ### old
 ```
 http://qiita.com/san_/items/128bf1b5a898ad5c18f1  
