@@ -7,4 +7,6 @@ API_TOKEN = "xxxxxxx"  #実際のAPIトークンに書き換え、ファイル�
 DEFAULT_REPLY = "何言ってんだこいつ"
 
 # プラグインスクリプトを置いてあるサブディレクトリ名のリスト
-PLUGINS = ['plugins']
+#PLUGINS = ['plugins_easy']
+PLUGINS = ['plugins_intermediate']
+#PLUGINS = ['plugins_difficult']
