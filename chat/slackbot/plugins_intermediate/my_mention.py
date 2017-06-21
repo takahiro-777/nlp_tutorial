@@ -6,6 +6,8 @@ from slackbot.bot import respond_to     # @botname: で反応するデコーダ
 from slackbot.bot import listen_to      # チャネル内発言で反応するデコーダ
 from slackbot.bot import default_reply  # 該当する応答がない場合に反応するデコーダ
 
+#m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
+
 # @respond_to('string')     bot宛のメッセージ
 #                           stringは正規表現が可能 「r'string'」
 # @listen_to('string')      チャンネル内のbot宛以外の投稿
@@ -38,15 +40,34 @@ def listen_func(message):
 def listen_func(message):
     message.send('沈黙')      # ただの投稿
 
-@listen_to('mecab')
+@listen_to('mecab sample')
 def listen_func(message):
     m = MeCab.Tagger ("-Ochasen")
-    message.send(m.parse ("18時から打ち合わせだ、だるい。"))
+    message.send(m.parse ("mecabのアウトプットのサンプルを出力します。"))
 
 @default_reply()
 def default_func(message):
     text = message.body['text']     # メッセージを取り出す
     # 送信メッセージを作る。改行やトリプルバッククォートで囲む表現も可能
     m = MeCab.Tagger ("-Ochasen")
-    msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
-    message.reply(msg)      # メンション
+    #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
+    m.parse('')
+    node = m.parseToNode(text)
+    node = node.next
+    #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
+    if node:
+        word = node.surface
+        #品詞を取得
+        pos = node.feature.split(",")[1]
+        #print('{0} , {1}'.format(word, pos))
+        #次の単語に進める
+        #node = node.next
+    message.reply("First word is "+word)      # メンション
+
+#@default_reply()
+#def default_func(message):
+#    text = message.body['text']     # メッセージを取り出す
+    # 送信メッセージを作る。改行やトリプルバッククォートで囲む表現も可能
+#    m = MeCab.Tagger ("-Ochasen")
+#    msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
+#    message.reply(msg)      # メンション
