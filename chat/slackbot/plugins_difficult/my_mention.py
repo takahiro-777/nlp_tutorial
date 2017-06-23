@@ -42,3 +42,7 @@ def listen_func(message):
 def listen_func(message):
     m = MeCab.Tagger ("-Ochasen")
     message.send(m.parse ("今日もしないとね"))
+
+@default_reply()
+def default_func(message):
+    aa
