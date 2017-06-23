@@ -2,6 +2,7 @@
 
 import sys
 import MeCab
+import CaboCha
 import yaml
 from slackbot.bot import respond_to     # @botname: で反応するデコーダ
 from slackbot.bot import listen_to      # チャネル内発言で反応するデコーダ
@@ -44,7 +45,13 @@ def listen_func(message):
 @listen_to('mecab sample')
 def listen_func(message):
     m = MeCab.Tagger ("-Ochasen")
-    message.send(m.parse ("mecabのアウトプットのサンプルを出力します。"))
+    message.send("```"+m.parse("mecabのアウトプットのサンプルを出力します。")+"```")
+
+@listen_to('cabocha sample')
+def listen_func(message):
+    c = CaboCha.Parser()
+    parsed =  c.parse("これは私のもっている赤いペンです")
+    message.send("```"+parsed.toString(CaboCha.FORMAT_TREE)+"```")
 
 @default_reply()
 def default_func(message):
