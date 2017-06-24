@@ -6,26 +6,20 @@
 $ brew install mecab
 $ brew install mecab-ipadic
 $ brew install git curl xz
-$ git clone --depth 1 git@github.com:neologd/mecab-ipadic-neologd.git
-$ cd mecab-ipadic-neologd
-$ ./bin/install-mecab-ipadic-neologd -n
-$ pip install mecab-python3
 
 # mecabのインストール(Windows)
 
-### mecabのインストール
+# 下記のブログを参考に、mecab-0.98.exeを使ってインストールを行う
+# http://handsrecs2nd.seesaa.net/article/140090025.html
+# 辞書の文字コードは"UTF-8"を選択すること
 
-[こちらのブログ](http://handsrecs2nd.seesaa.net/article/140090025.html)を参考に、mecab-0.98.exeを使ってインストールを行う
-
-+ 辞書の文字コードは"UTF-8"を選択すること
-
-### neologd辞書のインストール
+# neologd辞書(新語辞書)のインストール
 
 $ git clone --depth 1 git@github.com:neologd/mecab-ipadic-neologd.git
 $ cd mecab-ipadic-neologd
 $ ./bin/install-mecab-ipadic-neologd -n
 
-### MeCab-Pythonのインストール
+# MeCab-Python(PythonからMeCabを呼び出すためのPythonライブラリ)のインストール
 
 $ pip install mecab-python3
 
