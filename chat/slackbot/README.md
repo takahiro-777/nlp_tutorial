@@ -1,26 +1,14 @@
 # slackbot(pipモジュール)の利用方法
 
-## インストール
+## インストール(Mac)
 ```
-# mecabのインストール(Mac)
+# mecabのインストール
 $ brew install mecab
 $ brew install mecab-ipadic
 $ brew install git curl xz
-
-# mecabのインストール(Windows)
-
-# 下記のブログを参考に、mecab-0.98.exeを使ってインストールを行う
-# http://handsrecs2nd.seesaa.net/article/140090025.html
-# 辞書の文字コードは"UTF-8"を選択すること
-
-# neologd辞書(新語辞書)のインストール
-
 $ git clone --depth 1 git@github.com:neologd/mecab-ipadic-neologd.git
 $ cd mecab-ipadic-neologd
 $ ./bin/install-mecab-ipadic-neologd -n
-
-# MeCab-Python(PythonからMeCabを呼び出すためのPythonライブラリ)のインストール
-
 $ pip install mecab-python3
 
 # cabochaのインストール(参考: http://www.maytry.net/how-to-use-cabocha-mecab-with-python/)
@@ -44,3 +32,35 @@ $ pip install slackbot
 http://qiita.com/taroc/items/b9afd914432da08dafc8
 
 ```
+
+## インストール(Windows)
+
+### mecab(64bit版)のインストール
+
+MeCabは32bit版しか配布されていない。
+
+MeCabのWindows用Pythonバインディングは、64bit版のMeCabしか扱えないようであるので、ソースからコンパイルする必要がある
+
+http://qiita.com/o__mura/items/31fb75df6183199e95b6
+
+上記のリンクの方法を参考にされたい
+
+大まかな手順は
+
+1. 必要なファイルをMeCabの公式のGoogle Driveからダウンロード(mecab-0.996.exe, mecab-0.996.tar.gz, mecab-python-0.996.tar.gz)
+2. mecab-0.996.exeを実行して、MeCabの辞書や設定ファイルを作成する
+3. MeCabをコンパイルするために、Visual Studio 2015をインストールする
+4. 64bit版のMeCabのコンパイルを行うために、mecab-0.996.tar.gzを展開して、ソースコードを改変する
+5. MeCabの64bit版をコンパイルする
+6. mecab-pythonもそのままではインストールできない(pipではインストールできない)ので、ソースコードから直接インストールを行う
+
+### neologd(新語辞書)をインストールする(任意)
+
+neologdという新しい単語の辞書があると、より正確に形態素解析を行うことができます
+
++ git bashをインストールする
+  + https://git-for-windows.github.io/
+
++ 下記のブログを参考に辞書を追加する
+  + http://qiita.com/rinkuro/items/9d17f2dc5a23fa5bfb28
+
