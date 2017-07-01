@@ -40,7 +40,7 @@ def listen_func(message):
 #    c = CaboCha.Parser()
 #    parsed =  c.parse("これは私のもっている赤いペンです")
 #    message.send("```"+parsed.toString(CaboCha.FORMAT_TREE)+"```")
-"""
+
 @default_reply()
 def default_func(message):
     f = open("plugins_intermediate/word2tag.yml", "r+")
@@ -48,21 +48,19 @@ def default_func(message):
 
     text = message.body['text']     # メッセージを取り出す
     # 送信メッセージを作る。改行やトリプルバッククォートで囲む表現も可能
-    m = MeCab.Tagger ("-Ochasen")
+    t = Tokenizer()
     #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
-    m.parse('')
-    node = m.parseToNode(text)
+    tokens = t.tokenize(text)
     #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
     tags = []
-    while node:
-        word = node.surface
+    for token in tokens:
+        word = token.surface
         #品詞を取得
-        pos = node.feature.split(",")[1]
+        pos = token.part_of_speech.split(',')[0]
         if word in word2tag:
             tags.append(word2tag[word])
         #print('{0} , {1}'.format(word, pos))
         #次の単語に進める
-        node = node.next
     message.reply("```Sentence you input is "+text+". Sentence tag is "+','.join(tags)+"```")      # メンション
     #message.send("Sentence tag is"+','.join(tags)+"```")
 
@@ -73,4 +71,3 @@ def default_func(message):
 #    m = MeCab.Tagger ("-Ochasen")
 #    msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
 #    message.reply(msg)      # メンション
-"""
