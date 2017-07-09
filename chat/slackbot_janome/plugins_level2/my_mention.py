@@ -43,7 +43,7 @@ def listen_func(message):
 
 @default_reply()
 def default_func(message):
-    f = open("plugins_intermediate/word2tag.yml", "r+")
+    f = open("plugins_level2/word2tag.yml", "r+")
     word2tag = yaml.load(f)
 
     text = message.body['text']     # メッセージを取り出す
