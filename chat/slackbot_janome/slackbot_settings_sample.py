@@ -7,6 +7,6 @@ API_TOKEN = "xxxxxxx"  #実際のAPIトークンに書き換え、ファイル�
 DEFAULT_REPLY = "何言ってんだこいつ"
 
 # プラグインスクリプトを置いてあるサブディレクトリ名のリスト
-#PLUGINS = ['plugins_easy']
-PLUGINS = ['plugins_intermediate']
-#PLUGINS = ['plugins_difficult']
+PLUGINS = ['plugins_level1']    #slackbotの動作確認（ルールベース）
+#PLUGINS = ['plugins_level2']   #形態素解析　＆　それを利用したタグ付け
+#PLUGINS = ['plugins_level3']   #ネガポジ分析
