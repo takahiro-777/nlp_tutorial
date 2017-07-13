@@ -10,3 +10,6 @@ DEFAULT_REPLY = "何言ってんだこいつ"
 PLUGINS = ['plugins_level1']    #slackbotの動作確認（ルールベース）
 #PLUGINS = ['plugins_level2']   #形態素解析　＆　それを利用したタグ付け
 #PLUGINS = ['plugins_level3']   #ネガポジ分析
+#PLUGINS = ['plugins_level4']   #word2vecを利用した単語の分散表現（老人と海）
+#PLUGINS = ['plugins_level5']   #LSTMを利用した文章生成
+#PLUGINS = ['plugins_level6']   #seq2seqを利用した翻訳
