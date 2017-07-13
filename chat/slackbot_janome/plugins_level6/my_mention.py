@@ -3,6 +3,9 @@
 """
 Attention: チュートリアルのコードの書き直し途中のため、大幅なリファクタリング
 が必要。とはいえ、一旦動作したのでcommitする。
+https://github.com/tensorflow/tensorflow/issues/11157
+記載のエラーが生じたため、tensorflowのバージョンを1.0.0にダウングレードする
+必要あり。
 """
 
 import sys
