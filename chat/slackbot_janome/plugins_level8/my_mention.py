@@ -25,8 +25,8 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from plugins_level6 import data_utils
-from plugins_level6 import seq2seq_model
+from plugins_level8 import data_utils
+from plugins_level8 import seq2seq_model
 
 tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
 tf.app.flags.DEFINE_float("learning_rate_decay_factor", 0.99,
@@ -75,7 +75,7 @@ def create_model(session, forward_only):
       FLAGS.learning_rate_decay_factor,
       forward_only=forward_only,
       dtype=dtype)
-  ckpt = tf.train.get_checkpoint_state("plugins_level6/train_dir/")
+  ckpt = tf.train.get_checkpoint_state("plugins_level8/train_dir/")
   if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
     print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
     model.saver.restore(session, ckpt.model_checkpoint_path)
@@ -94,9 +94,9 @@ def default_func(message):
     model.batch_size = 1  # We decode one sentence at a time.
 
     # Load vocabularies.
-    en_vocab_path = os.path.join("plugins_level6/data/",
+    en_vocab_path = os.path.join("plugins_level8/data/",
                                  "vocab%d.from" % FLAGS.from_vocab_size)
-    fr_vocab_path = os.path.join("plugins_level6/data/",
+    fr_vocab_path = os.path.join("plugins_level8/data/",
                                  "vocab%d.to" % FLAGS.to_vocab_size)
     en_vocab, _ = data_utils.initialize_vocabulary(en_vocab_path)
     _, rev_fr_vocab = data_utils.initialize_vocabulary(fr_vocab_path)
