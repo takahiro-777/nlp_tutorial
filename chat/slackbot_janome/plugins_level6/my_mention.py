@@ -1,140 +1,107 @@
 # coding: utf-8
 
-"""
-Attention: チュートリアルのコードの書き直し途中のため、大幅なリファクタリング
-が必要。とはいえ、一旦動作したのでcommitする。
-https://github.com/tensorflow/tensorflow/issues/11157
-記載のエラーが生じたため、tensorflowのバージョンを1.0.0にダウングレードする
-必要あり。
-"""
-
 import sys
-from janome.tokenizer import Tokenizer
+import numpy as np
+import csv
+import gensim
+from pandas import DataFrame
 from slackbot.bot import respond_to     # @botname: で反応するデコーダ
 from slackbot.bot import listen_to      # チャネル内発言で反応するデコーダ
 from slackbot.bot import default_reply  # 該当する応答がない場合に反応するデコーダ
 
-import math
-import os
-import random
-import sys
-import time
-import logging
 
-import numpy as np
-from six.moves import xrange  # pylint: disable=redefined-builtin
-import tensorflow as tf
+# タグのid(key)とname(value)を結びつける辞書の作成
+tag_name_dict = {}
+with open('plugins_level6/data/qiita_tags.csv', 'r') as f_tags:
+    tag_reader = csv.reader(f_tags)
 
-from plugins_level6 import data_utils
-from plugins_level6 import seq2seq_model
+    for i, row in enumerate(tag_reader):
+        tag_name_dict[(i+1)] = row[0]
 
-tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
-tf.app.flags.DEFINE_float("learning_rate_decay_factor", 0.99,
-                          "Learning rate decays by this much.")
-tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
-                          "Clip gradients to this norm.")
-tf.app.flags.DEFINE_integer("batch_size", 64,
-                            "Batch size to use during training.")
-tf.app.flags.DEFINE_integer("size", 256, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("num_layers", 2, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("from_vocab_size", 40000, "English vocabulary size.")
-tf.app.flags.DEFINE_integer("to_vocab_size", 40000, "French vocabulary size.")
-tf.app.flags.DEFINE_string("data_dir", "/tmp", "Data directory")
-tf.app.flags.DEFINE_string("train_dir", "/tmp", "Training directory.")
-tf.app.flags.DEFINE_string("from_train_data", None, "Training data.")
-tf.app.flags.DEFINE_string("to_train_data", None, "Training data.")
-tf.app.flags.DEFINE_string("from_dev_data", None, "Training data.")
-tf.app.flags.DEFINE_string("to_dev_data", None, "Training data.")
-tf.app.flags.DEFINE_integer("max_train_data_size", 0,
-                            "Limit on the size of training data (0: no limit).")
-tf.app.flags.DEFINE_integer("steps_per_checkpoint", 50,
-                            "How many training steps to do per checkpoint.")
-tf.app.flags.DEFINE_boolean("decode", False,
-                            "Set to True for interactive decoding.")
-tf.app.flags.DEFINE_boolean("self_test", False,
-                            "Run a self-test if this is set to True.")
-tf.app.flags.DEFINE_boolean("use_fp16", False,
-                            "Train using fp16 instead of fp32.")
+#  あるユーザー（key）がどのタグをフォローしているか
+user_tags_dict = {}
+with open('plugins_level6/data/qiita_user_tags.csv', 'r') as f_user_tags:
+    user_tags_reader = csv.reader(f_user_tags)
 
-FLAGS = tf.app.flags.FLAGS
+    for i, row in enumerate(user_tags_reader):
+        user_tags_dict[int(row[0])] = row[1:-1]
 
-_buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+# tags_list フォローされているタグのリスト (複数人にフォローされていればダブリあり)
+tags_list = []
+for k, v in user_tags_dict.items():
+    tags_list.extend(v)
 
-def create_model(session, forward_only):
-  """Create translation model and initialize or load parameters in session."""
-  dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
-  model = seq2seq_model.Seq2SeqModel(
-      FLAGS.from_vocab_size,
-      FLAGS.to_vocab_size,
-      _buckets,
-      FLAGS.size,
-      FLAGS.num_layers,
-      FLAGS.max_gradient_norm,
-      FLAGS.batch_size,
-      FLAGS.learning_rate,
-      FLAGS.learning_rate_decay_factor,
-      forward_only=forward_only,
-      dtype=dtype)
-  ckpt = tf.train.get_checkpoint_state("plugins_level6/train_dir/")
-  if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-    print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-    model.saver.restore(session, ckpt.model_checkpoint_path)
-  else:
-    print("Created model with fresh parameters.")
-    session.run(tf.global_variables_initializer())
-  return model
+# 1人にしかフォローされていないタグ
+once_tags = [tag for tag in tags_list if tags_list.count(tag) == 1]
+
+# 1人しかフォローされていないタグをuser_tagsのタグからも削除
+user_tags_dict_multi = { k: [tag for tag in user_tags if not tag in once_tags] for k, user_tags in user_tags_dict.items()}
+
+# タグをフォローしていないユーザーを省く (1人しかフォローしていないタグは削除していることに注意)
+user_tags_dict_multi = {k: v for k, v in user_tags_dict_multi.items() if not len(v) == 0}
+
+# gemsimへのインプットのために変換
+corpus = [[(int(tag), 1) for tag in user_tags]for k, user_tags in user_tags_dict_multi.items()]
+
+# LDAのモデルの呼出と学習 ここでtopicの数(ユーザー層の数）を設定出来る
+lda = gensim.models.ldamodel.LdaModel(corpus=corpus, num_topics=15)
+
+# 各トピックの出現頻度上位１０位を取得
+topic_top10_tags = []
+for topic in lda.show_topics(-1, formatted=False):
+    topic_top10_tags.append([tag_name_dict[int(tag[0])] for tag in topic[1]])
+
+# 各トピックの出現頻度上位１０位を表示
+topic_data = DataFrame(topic_top10_tags)
+print(topic_data)
+print("------------------")
+
+# ユーザーの嗜好の表示
+c = [(1, 1), (2, 1)] # タグ1とタグ2をフォローしているユーザー
+for (tpc, prob) in lda.get_document_topics(c):
+    print(str(tpc) + ': '+str(prob))
+
+@listen_to('lda sample')
+def listen_func(message):
+    res = "```"+str(topic_data)
+    res = res+"\n===========\n\nユーザ嗜好\n"
+    c = [(1, 1), (2, 1)] # タグ1とタグ2をフォローしているユーザー
+    for (tpc, prob) in lda.get_document_topics(c):
+        res = res + str(tpc) + ': '+str(prob) + "\n"
+    res = res+"```"
+
+    #print(vecs.toarray())
+    message.reply(res)
+
 
 @default_reply()
 def default_func(message):
-  sentence = message.body['text']     # メッセージを取り出す
-  res = ""
-  with tf.Session() as sess:
-    # Create model and load parameters.
-    model = create_model(sess, True)
-    model.batch_size = 1  # We decode one sentence at a time.
-
-    # Load vocabularies.
-    en_vocab_path = os.path.join("plugins_level6/data/",
-                                 "vocab%d.from" % FLAGS.from_vocab_size)
-    fr_vocab_path = os.path.join("plugins_level6/data/",
-                                 "vocab%d.to" % FLAGS.to_vocab_size)
-    en_vocab, _ = data_utils.initialize_vocabulary(en_vocab_path)
-    _, rev_fr_vocab = data_utils.initialize_vocabulary(fr_vocab_path)
-    print("finished_loading")
-
-    # Decode from standard input.
-    #sys.stdout.write("> ")
-    #sys.stdout.flush()
-    #sentence = "How old are you?"
-
-    if sentence:
-      # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), en_vocab)
-      # Which bucket does it belong to?
-      bucket_id = len(_buckets) - 1
-      for i, bucket in enumerate(_buckets):
-        if bucket[0] >= len(token_ids):
-          bucket_id = i
-          break
-      else:
-        logging.warning("Sentence truncated: %s", sentence)
-
-      # Get a 1-element batch to feed the sentence to the model.
-      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
-          {bucket_id: [(token_ids, [])]}, bucket_id)
-      # Get output logits for the sentence.
-      _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
-                                       target_weights, bucket_id, True)
-      # This is a greedy decoder - outputs are just argmaxes of output_logits.
-      outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-      # If there is an EOS symbol in outputs, cut them at that point.
-      if data_utils.EOS_ID in outputs:
-        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-      # Print out French sentence corresponding to outputs.
-      print(" ".join([tf.compat.as_str(rev_fr_vocab[output]) for output in outputs]))
-      res = " ".join([tf.compat.as_str(rev_fr_vocab[output]) for output in outputs])
-      #print("> ", end="")
-      #sys.stdout.flush()
-      #sentence = sys.stdin.readline()
-
-    message.reply("```"+res+"```")
+    #f = open("plugins_difficult/polarity.yml", "r+")
+    #polarity = yaml.load(f)
+    """
+    text = message.body['text']     # メッセージを取り出す
+    # 送信メッセージを作る。改行やトリプルバッククォートで囲む表現も可能
+    t = Tokenizer()
+    #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
+    tokens = t.tokenize(text)
+    #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
+    pol_val = 0
+    for token in tokens:
+        word = token.surface
+        #品詞を取得
+        pos = token.part_of_speech.split(',')[0]
+        if word in polarity:
+            pol_val = pol_val + float(polarity[word])
+        #print('{0} , {1}'.format(word, pos))
+        #次の単語に進める
+    message.reply("```Sentence you input is "+text+". Sentence polarity is "+str(pol_val)+"```")      # メンション
+    #message.send("Sentence tag is"+','.join(tags)+"```")
+    if pol_val > 0.2:
+        message.react('+1')
+        message.reply("それはいいね！！")
+    elif pol_val < -0.2:
+        message.react('cry')
+        message.reply("そうか、どんまい")
+    else:
+        message.reply("なるほど、そうなんですね〜")
+    """
