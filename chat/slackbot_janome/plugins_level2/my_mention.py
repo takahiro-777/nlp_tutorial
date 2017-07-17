@@ -3,6 +3,7 @@
 import os
 import sys
 from janome.tokenizer import Tokenizer
+import codecs
 import yaml
 from slackbot.bot import respond_to     # @botname: で反応するデコーダ
 from slackbot.bot import listen_to      # チャネル内発言で反応するデコーダ
@@ -43,7 +44,8 @@ def listen_func(message):
 
 @default_reply()
 def default_func(message):
-    f = open("plugins_level2/word2tag.yml", "r+")
+    #f = open("plugins_level2/word2tag.yml", "r+")
+    f = codecs.open("plugins_level2/word2tag.yml", 'r', 'utf-8')
     word2tag = yaml.load(f)
 
     text = message.body['text']     # メッセージを取り出す
