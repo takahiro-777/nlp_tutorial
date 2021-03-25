@@ -6,7 +6,7 @@ gensim==2.2.0
 idna==2.5
 Janome==0.3.2
 numpy==1.13.1
-PyYAML==3.12
+PyYAML==5.4
 requests==2.18.1
 scipy==0.19.1
 six==1.10.0
